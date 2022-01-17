@@ -1,0 +1,94 @@
+create table customer (
+                          id int primary key,
+                          first_name varchar(100) not null,
+                          last_name varchar(100) not null,
+                          city varchar(100),
+                          country varchar(100),
+                          phone varchar(100)
+);
+create table supplier (
+                          id int primary key,
+                          company_name varchar(100) not null,
+                          contact_name varchar(100),
+                          contact_title varchar(100),
+                          city varchar(100),
+                          country varchar(100),
+                          phone varchar(100),
+                          fax varchar(100)
+);
+
+create table product (
+                         id int primary key,
+                         product_name varchar(100) not null,
+                         unit_price decimal(12,2) default 0,
+                         package varchar(100),
+                         is_discontinued boolean default false,
+                         supplier_id int references supplier(id) not null
+);
+
+create table orders (
+                        id int primary key,
+                        order_date timestamp default now(),
+                        order_number varchar(100),
+                        total_amount decimal(12,2) default 0,
+                        customer_id int references customer(id) not null
+);
+
+create table order_item (
+                            id int primary key,
+                            unit_price decimal(12,2) default 0,
+                            quantity int default 1,
+                            order_id int references orders(id) not null,
+                            product_id int references product(id) not null
+);
+
+select * from supplier;
+select * from product;
+select * from orders;
+select * from order_item;
+select * from customer;
+
+--1
+SELECT *FROM customer   WHERE country NOT IN ('Canada');
+--2
+SELECT country  FROM customer;
+--3
+SELECT COUNT(quantity) FROM order_item;
+--4
+SELECT MAX(total_amount) FROM orders;
+--5
+SELECT SUM(total_amount)FROM orders;
+--6
+SELECT SUM(total_amount) from orders
+WHERE order_date >to_timestamp('Dec 31 2013 ', 'MON DD YYYY');
+--7
+SELECT AVG(customer_id)FROM orders;
+--8
+SELECT first_name, AVG(total_amount) FROM orders join customer  on orders.customer_id=customer_id GROUP BY first_name;
+--9
+SELECT *FROM customer WHERE country IN('Brazil','Spain');
+--10
+SELECT * from orders where order_date between '2013-01-01' and '2013-12-31' and total_amount<100.00;
+--11
+SELECT *FROM customer WHERE  country IN('Germany','Spain','France','Italy') ORDER BY country;
+--12
+--SELECT country FROM supplier;
+SELECT *FROM customer,supplier WHERE supplier.country=customer.country;
+--13
+SELECT *FROM customer;
+SELECT *FROM customer WHERE first_name LIKE 'Jo%';
+--14
+SELECT *FROM customer WHERE first_name LIKE '___a';
+--15
+SELECT  COUNT(customer.id),country FROM customer  group by country;
+--16
+SELECT  COUNT(customer.id),country FROM customer  group by country  ORDER BY count(customer.id) DESC ;
+--17
+SELECT first_name, sum(total_amount), count(quantity) from orders join customer c
+    on orders.customer_id = c.id join order_item oi on orders.id
+ = oi.order_id group by first_name order by sum(total_amount);
+--18
+SELECT first_name, sum(total_amount), count(quantity)
+from orders join customer c on orders.customer_id =
+c.id join order_item oi on orders.id = oi.order_id
+group by first_name having count(quantity)>20 ;
